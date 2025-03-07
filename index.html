@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SU Works Unit Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        #animation {
+            font-size: 40px;
+            font-weight: bold;
+            margin-top: 20%;
+        }
+
+        .hidden { display: none; }
+
+        .option-button {
+            display: block;
+            width: 80%;
+            max-width: 400px;
+            margin: 10px auto;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .option-button:hover {
+            background-color: #45a049;
+        }
+
+        .input-box, .select-box {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            width: 40%;
+        }
+
+        #result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="animation">SU Works</div>
+
+    <div id="conversion-options" class="hidden">
+        <h2>Select a Conversion Category</h2>
+        <button class="option-button" onclick="showConverter('length')">Length & Distance</button>
+        <button class="option-button" onclick="showConverter('mass')">Mass & Weight</button>
+        <button class="option-button" onclick="showConverter('area')">Area</button>
+        <button class="option-button" onclick="showConverter('volume')">Volume & Capacity</button>
+        <button class="option-button" onclick="showConverter('time')">Time</button>
+        <button class="option-button" onclick="showConverter('temperature')">Temperature</button>
+        <button class="option-button" onclick="showConverter('speed')">Speed</button>
+        <button class="option-button" onclick="showConverter('energy')">Energy</button>
+        <button class="option-button" onclick="showConverter('power')">Power</button>
+        <button class="option-button" onclick="showConverter('pressure')">Pressure</button>
+        <button class="option-button" onclick="goBack()">Back</button>
+    </div>
+
+    <div id="converter-page" class="hidden">
+        <h2 id="converter-title"></h2>
+        <input type="number" id="input-value" class="input-box" placeholder="Enter value">
+        <select id="from-unit" class="select-box"></select>
+        <select id="to-unit" class="select-box"></select>
+        <button onclick="convert()">Convert</button>
+        <div id="result"></div>
+        <button class="option-button" onclick="goBack()">Back</button>
+    </div>
+
+    <script>
+        setTimeout(() => {
+            document.getElementById("animation").classList.add("hidden");
+            document.getElementById("conversion-options").classList.remove("hidden");
+        }, 3000);
+
+        const conversionData = {
+            length: {
+                title: "Length & Distance",
+                units: { 
+                    "Nanometers": 1e9, "Micrometers": 1e6, "Millimeters": 1000, "Centimeters": 100, "Decimeters": 10,
+                    "Meters": 1, "Kilometers": 0.001, "Inches": 39.3701, "Feet": 3.28084, "Yards": 1.09361, "Miles": 0.000621371
+                }
+            },
+            mass: {
+                title: "Mass & Weight",
+                units: { 
+                    "Micrograms": 1e6, "Milligrams": 1000, "Centigrams": 100, "Decigrams": 10, "Grams": 1,
+                    "Kilograms": 0.001, "Tonnes": 1e-6, "Pounds": 0.00220462, "Ounces": 0.035274, "Stone": 0.000157473
+                }
+            },
+            area: {
+                title: "Area",
+                units: { 
+                    "Square Millimeters": 1e6, "Square Centimeters": 10000, "Square Meters": 1, "Square Kilometers": 0.000001,
+                    "Square Inches": 1550.0031, "Square Feet": 10.7639, "Square Yards": 1.19599,
+                    "Acres": 0.000247105, "Hectares": 0.0001
+                }
+            },
+            volume: { title: "Volume & Capacity", units: { "Liters": 1, "Milliliters": 1000, "Gallons": 0.264172 } },
+            time: { title: "Time", units: { "Seconds": 1, "Minutes": 0.0166667, "Hours": 0.000277778 } },
+            temperature: { title: "Temperature", units: { "Celsius": 1, "Fahrenheit": 1.8 } },
+            speed: { title: "Speed", units: { "Meters per second": 1, "Kilometers per hour": 3.6, "Miles per hour": 2.23694 } },
+            energy: { title: "Energy", units: { "Joules": 1, "Kilojoules": 0.001, "Calories": 0.239006 } },
+            power: { title: "Power", units: { "Watts": 1, "Kilowatts": 0.001 } },
+            pressure: { title: "Pressure", units: { "Pascals": 1, "Bar": 0.00001 } }
+        };
+
+        function showConverter(type) {
+            document.getElementById("conversion-options").classList.add("hidden");
+            document.getElementById("converter-page").classList.remove("hidden");
+            document.getElementById("converter-title").innerText = conversionData[type].title;
+
+            let fromSelect = document.getElementById("from-unit");
+            let toSelect = document.getElementById("to-unit");
+            fromSelect.innerHTML = "";
+            toSelect.innerHTML = "";
+
+            for (let unit in conversionData[type].units) {
+                let option1 = new Option(unit, unit);
+                let option2 = new Option(unit, unit);
+                fromSelect.add(option1);
+                toSelect.add(option2);
+            }
+        }
+
+        function convert() {
+            let inputValue = document.getElementById("input-value").value;
+            let fromUnit = document.getElementById("from-unit").value;
+            let toUnit = document.getElementById("to-unit").value;
+            let category = document.getElementById("converter-title").innerText;
+
+            let selectedCategory = Object.values(conversionData).find(cat => cat.title === category);
+            let conversionFactor = selectedCategory.units[toUnit] / selectedCategory.units[fromUnit];
+            let result = inputValue * conversionFactor;
+
+            document.getElementById("result").innerText = `Result: ${result.toFixed(4)} ${toUnit}`;
+        }
+
+        function goBack() {
+            document.getElementById("converter-page").classList.add("hidden");
+            document.getElementById("conversion-options").classList.remove("hidden");
+        }
+    </script>
+
+</body>
+</html>
